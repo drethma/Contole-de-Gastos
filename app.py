@@ -124,11 +124,10 @@ elif opcao == "📈 Gráficos":
             st.markdown("### 💵 Saldo")
             st.success(f"R$ {saldo:,.2f}")
 
-        # Adicionando mês ao DataFrame
+        # Gráfico principal
         df["Mês"] = pd.to_datetime(df["Data"]).dt.strftime("%Y-%m")
         df_agrupado = df.groupby(["Mês", "Tipo"], as_index=False).sum()
         
-        # Gráfico principal
         fig = px.bar(
             df_agrupado, 
             x="Mês", 
@@ -141,7 +140,7 @@ elif opcao == "📈 Gráficos":
             text_auto=True
         )
         st.plotly_chart(fig)
-        
+
         # Gráfico de barras ordenado por descrição
         df_ordenado = df.sort_values(by="Valor")
         fig2 = px.bar(
@@ -151,7 +150,7 @@ elif opcao == "📈 Gráficos":
             color="Tipo", 
             orientation="h", 
             color_discrete_map={"Entrada": "green", "Saída": "red"},
-            title="📋 Gráfico Ordenado de Entradas e Saídas por Descrição",
+            title="📊 Gráfico Ordenado de Entradas e Saídas por Descrição",
             labels={"Valor": "Valor (R$)", "Descrição": "Descrição"},
             text_auto=True
         )
@@ -176,9 +175,21 @@ elif opcao == "📈 Gráficos":
         if not df[df["Tipo"] == "Entrada"].empty:
             maior_entrada = df[df["Tipo"] == "Entrada"].sort_values(by="Valor", ascending=False).iloc[0]
             st.write(f"💹 **Sua maior entrada foi:** {maior_entrada['Descrição']} no valor de R$ {maior_entrada['Valor']:,.2f} em {maior_entrada['Data']}.")
-        
+            
+
+        # Botão de Download das Informações (abaixo da Análise)
+        st.markdown("### 📥 Baixar Dados")
+        csv = df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Baixar Dados em CSV",
+            data=csv,
+            file_name="transacoes.csv",
+            mime="text/csv"
+        )
+
     else:
         st.info("ℹ️ Nenhuma transação cadastrada ainda.")
+
 
 # Fechar conexão com o banco de dados
 conn.close()
